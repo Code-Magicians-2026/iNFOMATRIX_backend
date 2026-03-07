@@ -1,6 +1,6 @@
-﻿using Infomatrix.Api.Domain;
+﻿using Infomatrix.Core.Api.Domain;
 
-namespace Infomatrix.Api.Abstractions;
+namespace Infomatrix.Core.Api.Abstractions;
 
 public interface IRepository<T>
     where T : BaseEntity

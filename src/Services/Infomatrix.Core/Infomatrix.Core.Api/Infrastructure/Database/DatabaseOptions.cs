@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Infomatrix.Api.Infrastructure.Database;
+namespace Infomatrix.Core.Api.Infrastructure.Database;
 
 public sealed class DatabaseOptions
 {

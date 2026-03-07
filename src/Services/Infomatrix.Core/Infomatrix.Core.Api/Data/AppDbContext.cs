@@ -1,7 +1,7 @@
-﻿using Infomatrix.Api.Domain;
+﻿using Infomatrix.Core.Api.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infomatrix.Api.Data;
+namespace Infomatrix.Core.Api.Data;
 
 public class AppDbContext : DbContext
 {

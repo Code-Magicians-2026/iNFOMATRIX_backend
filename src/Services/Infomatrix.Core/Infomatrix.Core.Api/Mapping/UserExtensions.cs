@@ -1,7 +1,7 @@
-﻿using Infomatrix.Api.Domain;
-using Infomatrix.Api.Dtos;
+﻿using Infomatrix.Core.Api.Domain;
+using Infomatrix.Core.Api.Dtos;
 
-namespace Infomatrix.Api.Mapping;
+namespace Infomatrix.Core.Api.Mapping;
 
 public static class UserExtensions
 {

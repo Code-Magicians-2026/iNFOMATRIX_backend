@@ -1,13 +1,13 @@
-﻿using Infomatrix.Api.Abstractions.Services;
-using Infomatrix.Api.Domain;
-using Infomatrix.Api.Dtos;
+﻿using Infomatrix.Core.Api.Abstractions.Services;
+using Infomatrix.Core.Api.Domain;
+using Infomatrix.Core.Api.Dtos;
 using Microsoft.Extensions.Options;
 using Supabase.Gotrue;
 using Supabase.Gotrue.Exceptions;
 using System.Text.Json;
 using SupabaseClient = Supabase.Client;
 
-namespace Infomatrix.Api.Infrastructure.Auth;
+namespace Infomatrix.Core.Api.Infrastructure.Auth;
 
 public class AuthService : IAuthService
 {

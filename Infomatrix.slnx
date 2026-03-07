@@ -6,6 +6,9 @@
   <Folder Name="/src/Services/" />
   <Folder Name="/src/Services/Infomatrix.Core/" />
   <Folder Name="/src/Services/Infomatrix.Core/Infomatrix.Core.Api/">
-    <Project Path="src/Services/Infomatrix.Core/Infomatrix.Core.Api/Infomatrix.Api.csproj" />
+    <Project Path="src/Services/Infomatrix.Core/Infomatrix.Core.Api/Infomatrix.Core.Api.csproj" />
+    <Project Path="src/Services/Infomatrix.Core/Infomatrix.Core.Application/Infomatrix.Core.Application.csproj" Id="ffb3a862-0752-4d7b-ba5f-1dfa40f0a541" />
+    <Project Path="src/Services/Infomatrix.Core/Infomatrix.Core.Domain/Infomatrix.Core.Domain.csproj" Id="2f55f37a-5d0f-4647-8669-1c9250924c77" />
+    <Project Path="src/Services/Infomatrix.Core/Infomatrix.Core.Infrastructure/Infomatrix.Core.Infrastructure.csproj" Id="f873ba46-139f-4005-94b3-adef9d5be68f" />
   </Folder>
 </Solution>

@@ -1,5 +1,5 @@
-using Infomatrix.Api.Extensions;
-using Infomatrix.Api.Middlewares;
+using Infomatrix.Core.Api.Extensions;
+using Infomatrix.Core.Api.Middlewares;
 
 var builder = WebApplication
     .CreateBuilder(args);

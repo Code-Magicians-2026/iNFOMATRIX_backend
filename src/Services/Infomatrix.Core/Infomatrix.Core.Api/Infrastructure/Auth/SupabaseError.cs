@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Infomatrix.Api.Infrastructure.Auth;
+namespace Infomatrix.Core.Api.Infrastructure.Auth;
 
 
 [JsonConverter(typeof(SupabaseErrorConverter))]

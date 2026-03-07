@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Infomatrix.Api.Infrastructure.Auth;
+namespace Infomatrix.Core.Api.Infrastructure.Auth;
 
 public class SupabaseErrorConverter : JsonConverter<SupabaseError>
 {

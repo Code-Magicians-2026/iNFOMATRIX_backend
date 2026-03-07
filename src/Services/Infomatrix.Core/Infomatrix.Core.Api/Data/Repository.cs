@@ -1,8 +1,8 @@
-﻿using Infomatrix.Api.Abstractions;
-using Infomatrix.Api.Domain;
+﻿using Infomatrix.Core.Api.Abstractions;
+using Infomatrix.Core.Api.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infomatrix.Api.Data;
+namespace Infomatrix.Core.Api.Data;
 
 public class Repository<T> : IRepository<T>
     where T : BaseEntity

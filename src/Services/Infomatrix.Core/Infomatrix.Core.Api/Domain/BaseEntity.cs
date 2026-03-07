@@ -1,4 +1,4 @@
-﻿namespace Infomatrix.Api.Domain;
+﻿namespace Infomatrix.Core.Api.Domain;
 
 public abstract class BaseEntity
 {

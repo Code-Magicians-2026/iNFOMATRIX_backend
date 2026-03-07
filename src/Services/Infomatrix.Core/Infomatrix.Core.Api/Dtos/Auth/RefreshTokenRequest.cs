@@ -1,4 +1,4 @@
-namespace Infomatrix.Api.Dtos.Auth;
+namespace Infomatrix.Core.Api.Dtos.Auth;
 
 public record RefreshTokenRequest(
     string AccessToken,

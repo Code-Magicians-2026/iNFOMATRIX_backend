@@ -1,14 +1,14 @@
-using Infomatrix.Api.Abstractions;
-using Infomatrix.Api.Abstractions.Services;
-using Infomatrix.Api.Data;
-using Infomatrix.Api.Infrastructure.Auth;
-using Infomatrix.Api.Infrastructure.Database;
+using Infomatrix.Core.Api.Abstractions;
+using Infomatrix.Core.Api.Abstractions.Services;
+using Infomatrix.Core.Api.Data;
+using Infomatrix.Core.Api.Infrastructure.Auth;
+using Infomatrix.Core.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace Infomatrix.Api.Extensions;
+namespace Infomatrix.Core.Api.Extensions;
 
 public static class ServiceCollectionExtensions
 {

@@ -1,11 +1,11 @@
-﻿using Infomatrix.Api.Abstractions;
-using Infomatrix.Api.Domain;
-using Infomatrix.Api.Dtos;
-using Infomatrix.Api.Mapping;
+﻿using Infomatrix.Core.Api.Abstractions;
+using Infomatrix.Core.Api.Domain;
+using Infomatrix.Core.Api.Dtos;
+using Infomatrix.Core.Api.Mapping;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Infomatrix.Api.Controllers;
+namespace Infomatrix.Core.Api.Controllers;
 
 [Authorize]
 [ApiController]

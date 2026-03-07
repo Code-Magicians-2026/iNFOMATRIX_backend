@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Infomatrix.Api.Infrastructure.Auth;
+namespace Infomatrix.Core.Api.Infrastructure.Auth;
 
 public sealed class SupabaseOptions
 {

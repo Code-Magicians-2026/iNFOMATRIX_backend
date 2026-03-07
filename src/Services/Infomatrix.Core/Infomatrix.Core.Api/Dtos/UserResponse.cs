@@ -1,4 +1,4 @@
-﻿namespace Infomatrix.Api.Dtos;
+﻿namespace Infomatrix.Core.Api.Dtos;
 
 public record UserResponse(
     Guid Id,
