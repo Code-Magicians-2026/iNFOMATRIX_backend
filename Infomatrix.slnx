@@ -2,5 +2,10 @@
   <Folder Name="/Solution Items/">
     <File Path=".github/workflows/azure-deploy.yml" />
   </Folder>
-  <Project Path="Infomatrix.Api/Infomatrix.Api.csproj" />
+  <Folder Name="/src/" />
+  <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/Infomatrix.Core/" />
+  <Folder Name="/src/Services/Infomatrix.Core/Infomatrix.Core.Api/">
+    <Project Path="src/Services/Infomatrix.Core/Infomatrix.Core.Api/Infomatrix.Api.csproj" />
+  </Folder>
 </Solution>
