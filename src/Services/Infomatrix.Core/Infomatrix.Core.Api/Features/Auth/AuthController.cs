@@ -1,8 +1,8 @@
-using Infomatrix.Core.Application.Abstractions.Services;
-using Infomatrix.Core.Application.DTOs;
+using Infomatrix.Core.Api.Features.Auth.Mappers;
 using Infomatrix.Core.Api.Features.Auth.Requests;
 using Infomatrix.Core.Api.Features.Auth.Responses;
-using Infomatrix.Core.Api.Features.Auth.Mappers;
+using Infomatrix.Core.Application.Abstractions.Services;
+using Infomatrix.Core.Application.DTOs.Auth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Infomatrix.Core.Api.Features.Auth;
