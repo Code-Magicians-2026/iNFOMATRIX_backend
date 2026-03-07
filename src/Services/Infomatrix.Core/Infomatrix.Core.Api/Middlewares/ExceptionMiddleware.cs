@@ -1,4 +1,5 @@
-﻿using Infomatrix.Core.Api.Domain;
+﻿using Infomatrix.Core.Domain.Exceptions;
+using Infomatrix.Core.Application.Exceptions;
 
 namespace Infomatrix.Core.Api.Middlewares;
 
@@ -21,14 +22,15 @@ public class ExceptionMiddleware
         {
             await _next(context);
         }
-        catch (AuthenticationException ex)
+        catch (Application.Exceptions.AuthenticationException ex)
         {
             _logger.LogWarning(
                 ex,
                 "Authentication failed: {Message}",
                 ex.Message);
 
-            context.Response.StatusCode = ex.StatusCode;
+            var statusCode = GetAuthenticationStatusCode(ex.Message);
+            context.Response.StatusCode = statusCode;
             await context.Response
                 .WriteAsJsonAsync(new { error = ex.Message });
         }
@@ -55,5 +57,19 @@ public class ExceptionMiddleware
             await context.Response
                 .WriteAsJsonAsync(new { error = "Internal server error" });
         }
+    }
+
+    private static int GetAuthenticationStatusCode(string message)
+    {
+        return message switch
+        {
+            var msg when msg.Contains("not found", StringComparison.OrdinalIgnoreCase) 
+                => StatusCodes.Status404NotFound,
+            var msg when msg.Contains("already exists", StringComparison.OrdinalIgnoreCase) 
+                => StatusCodes.Status409Conflict,
+            var msg when msg.Contains("unknown", StringComparison.OrdinalIgnoreCase) 
+                => StatusCodes.Status500InternalServerError,
+            _ => StatusCodes.Status401Unauthorized
+        };
     }
 }
