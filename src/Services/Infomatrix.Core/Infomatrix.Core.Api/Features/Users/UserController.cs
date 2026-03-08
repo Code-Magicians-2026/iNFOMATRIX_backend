@@ -1,4 +1,4 @@
-﻿using Infomatrix.Core.Application.Abstractions.Repositories;
+﻿using Infomatrix.Core.Application.Abstractions;
 using Infomatrix.Core.Domain.Entities;
 using Infomatrix.Core.Api.Features.Users.Requests;
 using Infomatrix.Core.Api.Features.Users.Responses;
