@@ -1,6 +1,7 @@
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Infomatrix.Core.Infrastructure.Auth.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 
 namespace Infomatrix.Core.Api.Extensions;
 
@@ -12,7 +13,35 @@ public static class ServiceCollectionExtensions
     {
         services.AddControllers();
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services.AddSwaggerGen(options =>
+        {
+            options.AddSecurityDefinition(
+                "Bearer",
+                new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer"
+                });
+
+            options.AddSecurityRequirement(
+                new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+        });
+
         services.AddHealthChecks();
 
         services.AddOptions<JwtOptions>()
@@ -27,13 +56,14 @@ public static class ServiceCollectionExtensions
                     .GetSection(JwtOptions.SectionName)
                     .Get<JwtOptions>();
 
+                var bytes = Encoding.UTF8.GetBytes(jwtOptions!.SecretKey);
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions!.SecretKey)),
+                    IssuerSigningKey = new SymmetricSecurityKey(bytes),
                     ValidAudience = jwtOptions.Audience,
-                    ValidIssuer = jwtOptions.Issuer,
-                    ValidateLifetime = true
+                    ValidIssuer = jwtOptions.Issuer
                 };
             });
 
