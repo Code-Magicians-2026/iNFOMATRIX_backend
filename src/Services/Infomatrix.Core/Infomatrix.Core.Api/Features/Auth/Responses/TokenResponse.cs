@@ -2,6 +2,7 @@ namespace Infomatrix.Core.Api.Features.Auth.Responses;
 
 public record TokenResponse(
     string AccessToken,
+    long ExpiresIn,
     string RefreshToken,
-    int ExpiresIn,
-    string TokenType);
+    Guid UserId,
+    string? Email);

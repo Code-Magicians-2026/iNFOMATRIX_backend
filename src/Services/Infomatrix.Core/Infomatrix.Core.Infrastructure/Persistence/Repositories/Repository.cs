@@ -2,13 +2,13 @@
 using Infomatrix.Core.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infomatrix.Core.Infrastructure.Persistence;
+namespace Infomatrix.Core.Infrastructure.Persistence.Repositories;
 
 public class Repository<T> : IRepository<T>
     where T : BaseEntity
 {
     private readonly AppDbContext _context;
-    private readonly DbSet<T> _dbSet;
+    protected readonly DbSet<T> _dbSet;
 
     public Repository(AppDbContext context)
     {

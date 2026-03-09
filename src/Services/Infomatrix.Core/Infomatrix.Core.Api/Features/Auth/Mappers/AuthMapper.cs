@@ -9,13 +9,16 @@ public static class AuthMapper
     {
         return new TokenResponse(
             dto.AccessToken,
+            dto.ExpiresIn,
             dto.RefreshToken,
-            (int)dto.ExpiresIn,
-            dto.TokenType);
+            dto.UserId,
+            dto.Email
+            );
     }
 
-    public static EmailResponse ToResponse(this string email)
+    public static EmailResponse ToResponse(this EmailDto dto)
     {
-        return new EmailResponse(email);
+        return new EmailResponse(
+            dto.Email);
     }
 }
