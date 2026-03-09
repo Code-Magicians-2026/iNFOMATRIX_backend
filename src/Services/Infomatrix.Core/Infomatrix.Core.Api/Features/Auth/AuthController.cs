@@ -1,130 +1,171 @@
+using Infomatrix.Core.Api.Base;
+using Infomatrix.Core.Api.Extensions;
 using Infomatrix.Core.Api.Features.Auth.Mappers;
 using Infomatrix.Core.Api.Features.Auth.Requests;
 using Infomatrix.Core.Api.Features.Auth.Responses;
-using Infomatrix.Core.Application.Abstractions.Services;
+using Infomatrix.Core.Application.Abstractions.Messaging;
 using Infomatrix.Core.Application.DTOs.Auth;
+using Infomatrix.Core.Application.Features.Auth.CheckEmail;
+using Infomatrix.Core.Application.Features.Auth.ConfirmEmail;
+using Infomatrix.Core.Application.Features.Auth.Login;
+using Infomatrix.Core.Application.Features.Auth.RefreshToken;
+using Infomatrix.Core.Application.Features.Auth.Register;
+using Infomatrix.Core.Application.Features.Auth.RequestResetPassword;
+using Infomatrix.Core.Application.Features.Auth.ResetPassword;
+using Infomatrix.Core.Application.Features.Auth.VerifyOtp;
+using Infomatrix.Core.Shared.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Infomatrix.Core.Api.Features.Auth;
 
 [Route("api/auth")]
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController : BaseController
 {
-    private readonly IAuthService _authService;
-
-    public AuthController(IAuthService authService)
+    public AuthController(ISender sender)
+        : base(sender)
     {
-        _authService = authService;
+    }
+
+    [HttpPost("check-email")]
+    [ProducesResponseType<EmailResponse>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> CheckEmailAsync(
+        [FromBody] EmailRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new CheckEmailCommand(request.Email);
+
+        var result = await _sender
+            .Send(command, cancellationToken);
+
+        return result
+            .Map(r => r.ToResponse())
+            .ToActionResult();
     }
 
     [HttpPost("register")]
     [ProducesResponseType<EmailResponse>(StatusCodes.Status200OK)]
     public async Task<IActionResult> RegisterAsync(
-        [FromBody] RegisterRequest request)
+        [FromBody] RegisterRequest request,
+        CancellationToken cancellationToken)
     {
-        var email = await _authService.RegisterUserAsync(
+        var command = new RegisterCommand(
+            request.FullName,
             request.Email,
             request.Password);
 
-        return Ok(email.ToResponse());
+        var result = await _sender
+            .Send(command, cancellationToken);
+
+        return result
+            .Map(r => r.ToResponse())
+            .ToActionResult();
     }
 
     [HttpPost("confirm-email")]
     [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
     public async Task<IActionResult> ConfirmEmailAsync(
-        [FromBody] ConfirmEmailRequest request)
+        [FromBody] ConfirmEmailRequest request,
+        CancellationToken cancellationToken)
     {
-        var tokenDto = await _authService.ConfirmEmailAsync(
+        var command = new ConfirmEmailCommand(
             request.Email,
-            request.Token,
-            request.Password);
+            request.Token);
 
-        return Ok(tokenDto.ToResponse());
+        var result = await _sender
+            .Send(command, cancellationToken);
+
+        return result
+            .Map(r => r.ToResponse())
+            .ToActionResult();
     }
 
     [HttpPost("login")]
     [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
     public async Task<IActionResult> LoginAsync(
-        [FromBody] LoginRequest request)
+        [FromBody] LoginRequest request,
+        CancellationToken cancellationToken)
     {
-        var tokenDto = await _authService.LoginAsync(
+        var command = new LoginCommand(
             request.Email,
             request.Password);
 
-        return Ok(tokenDto.ToResponse());
-    }
+        var result = await _sender
+            .Send(command, cancellationToken);
 
-    [HttpPost("google")]
-    [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
-    public async Task<IActionResult> LoginWithGoogleAsync(
-        [FromBody] IdTokenRequest request)
-    {
-        var tokenDto = await _authService.LoginWithGoogleAsync(request.IdToken);
-
-        return Ok(tokenDto.ToResponse());
-    }
-
-    [HttpPost("apple")]
-    [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
-    public async Task<IActionResult> LoginWithAppleAsync(
-        [FromBody] IdTokenRequest request)
-    {
-        var tokenDto = await _authService.LoginWithAppleAsync(request.IdToken);
-
-        return Ok(tokenDto.ToResponse());
+        return result
+            .Map(r => r.ToResponse())
+            .ToActionResult();
     }
 
     [HttpPost("refresh-token")]
     [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
     public async Task<IActionResult> RefreshTokenAsync(
-        [FromBody] RefreshTokenRequest request)
+        [FromBody] RefreshTokenRequest request,
+        CancellationToken cancellationToken)
     {
-        var tokenDto = await _authService.RefreshTokenAsync(
+        var command = new RefreshTokenCommand(
             request.AccessToken,
             request.RefreshToken);
 
-        return Ok(tokenDto.ToResponse());
+        var result = await _sender
+            .Send(command, cancellationToken);
+
+        return result
+            .Map(r => r.ToResponse())
+            .ToActionResult();
     }
 
     [HttpPost("request-reset-password")]
     [ProducesResponseType<EmailResponse>(StatusCodes.Status200OK)]
     public async Task<IActionResult> RequestResetPasswordAsync(
-        [FromBody] RequestResetPasswordRequest request)
+        [FromBody] RequestResetPasswordRequest request,
+        CancellationToken cancellationToken)
     {
-        var email = await _authService.RequestResetPasswordAsync(request.Email);
+        var command = new RequestResetPasswordCommand(
+            request.Email);
 
-        return Ok(email.ToResponse());
+        var result = await _sender
+            .Send(command, cancellationToken);
+
+        return result
+            .Map(r => r.ToResponse())
+            .ToActionResult();
     }
 
     [HttpPost("verify-otp")]
-    [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<EmailResponse>(StatusCodes.Status200OK)]
     public async Task<IActionResult> VerifyOtpAsync(
-        [FromBody] VerifyOtpRequest request)
+        [FromBody] VerifyOtpRequest request,
+        CancellationToken cancellationToken)
     {
-        var tokenDto = await _authService.VerifyOtpAsync(
+        var command = new VerifyOtpCommand(
             request.Email,
             request.Token);
 
-        return Ok(tokenDto.ToResponse());
+        var result = await _sender
+            .Send(command, cancellationToken);
+
+        return result
+            .Map(r => r.ToResponse())
+            .ToActionResult();
     }
 
     [HttpPost("reset-password")]
-    [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<TokenDto>(StatusCodes.Status200OK)]
     public async Task<IActionResult> ResetPasswordAsync(
-        [FromBody] ResetPasswordRequest request)
+        [FromBody] ResetPasswordRequest request,
+        CancellationToken cancellationToken)
     {
-        var inputToken = new TokenDto(
-            request.AccessToken,
-            request.RefreshToken,
-            0,
-            "bearer");
-
-        var tokenDto = await _authService.ResetPasswordAsync(
+        var command = new ResetPasswordCommand(
             request.Email,
-            request.NewPassword,
-            inputToken);
+            request.NewPassword);
 
-        return Ok(tokenDto.ToResponse());
+        var result = await _sender
+            .Send(command, cancellationToken);
+
+        return result
+            .Map(r => r.ToResponse())
+            .ToActionResult();
     }
 }

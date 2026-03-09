@@ -1,5 +1,5 @@
-﻿using Infomatrix.Core.Domain.Exceptions;
-using Infomatrix.Core.Application.Exceptions;
+﻿using Infomatrix.Core.Application.Exceptions;
+using Infomatrix.Core.Domain.Common;
 
 namespace Infomatrix.Core.Api.Middlewares;
 

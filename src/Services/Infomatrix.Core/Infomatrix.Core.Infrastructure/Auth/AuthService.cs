@@ -1,12 +1,16 @@
 using Infomatrix.Core.Application.Abstractions.Services;
+using Infomatrix.Core.Application.DTOs.Auth;
 using Infomatrix.Core.Application.Exceptions;
+using Infomatrix.Core.Domain.Features.Auth;
+using Infomatrix.Core.Infrastructure.Extensions.Supabase;
+using Infomatrix.Core.Shared;
+using Infomatrix.Core.Shared.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Supabase.Gotrue;
 using Supabase.Gotrue.Exceptions;
 using System.Text.Json;
 using SupabaseClient = Supabase.Client;
-using Infomatrix.Core.Application.DTOs.Auth;
 
 namespace Infomatrix.Core.Infrastructure.Auth;
 
@@ -26,35 +30,35 @@ public class AuthService : IAuthService
         _secretKey = options.Value.AdminKey;
     }
 
-    public async Task<string> RegisterUserAsync(string email, string password)
+    public async Task<Result<string>> RegisterUserAsync(string email, string password)
     {
         try
         {
             var session = await _supabaseClient.Auth.SignUp(email, password);
 
             if (session?.User is null)
-                AuthenticationException.ThrowUnknownError();
+                return Result.Failure<string>(AuthErrors.UnknownError);
 
-            if (IsFakeUser(session.User))
-                AuthenticationException.ThrowEmailAlreadyExists(email);
+            if (session.User.IsFakeUser())
+                return Result.Failure<string>(AuthErrors.AlreadyExists(email));
 
-            return email;
+            return Result.Success(email);
         }
         catch (GotrueException ex)
         {
-            HandleGoTrueException(ex);
-            throw;
+            return ex.HandleGoTrueException(_logger)
+                .MapFailure<string>();
         }
     }
 
-    public async Task<TokenDto> ConfirmEmailAsync(
+    public async Task<Result<TokenDto>> ConfirmEmailAsync(
         string email,
         string token,
         string lastPassword)
     {
         if (string.IsNullOrEmpty(lastPassword))
         {
-            AuthenticationException.ThrowTokenExpired();
+            return Result.Failure<TokenDto>(AuthErrors.TokenExpired);
         }
 
         try
@@ -64,22 +68,23 @@ public class AuthService : IAuthService
 
             if (session is null)
             {
-                LogNullSession(nameof(ConfirmEmailAsync), $"Email: {email}");
-                AuthenticationException.ThrowNullSession();
+                return HandleNullSession<TokenDto>(
+                    nameof(ConfirmEmailAsync),
+                    $"Email: {email}");
             }
 
             await TryUpdatePasswordAsync(lastPassword);
 
-            return MapToTokenDto(session);
+            return session.HandleSession(_logger);
         }
         catch (GotrueException ex)
         {
-            HandleGoTrueException(ex);
-            throw;
+            return ex.HandleGoTrueException(_logger)
+                .MapFailure<TokenDto>();
         }
     }
 
-    public async Task<TokenDto> LoginAsync(string email, string password)
+    public async Task<Result<TokenDto>> LoginAsync(string email, string password)
     {
         try
         {
@@ -88,26 +93,27 @@ public class AuthService : IAuthService
 
             if (session is null)
             {
-                LogNullSession(nameof(LoginAsync), $"Email: {email}");
-                AuthenticationException.ThrowNullSession();
+                return HandleNullSession<TokenDto>(
+                    nameof(LoginAsync),
+                    $"Email: {email}");
             }
 
-            return MapToTokenDto(session);
+            return session.HandleSession(_logger);
         }
         catch (GotrueException ex)
         {
-            HandleGoTrueException(ex);
-            throw;
+            return ex.HandleGoTrueException(_logger)
+                .MapFailure<TokenDto>();
         }
     }
 
-    public Task<TokenDto> LoginWithGoogleAsync(string idToken) =>
+    public Task<Result<TokenDto>> LoginWithGoogleAsync(string idToken) =>
         LoginWithProviderAsync(idToken, Constants.Provider.Google);
 
-    public Task<TokenDto> LoginWithAppleAsync(string idToken) =>
+    public Task<Result<TokenDto>> LoginWithAppleAsync(string idToken) =>
         LoginWithProviderAsync(idToken, Constants.Provider.Apple);
 
-    private async Task<TokenDto> LoginWithProviderAsync(
+    private async Task<Result<TokenDto>> LoginWithProviderAsync(
         string idToken,
         Constants.Provider provider)
     {
@@ -119,20 +125,21 @@ public class AuthService : IAuthService
 
             if (session is null)
             {
-                LogNullSession(nameof(LoginWithProviderAsync), $"Provider: {provider}");
-                AuthenticationException.ThrowOAuthProviderError(provider.ToString());
+                return HandleNullSession<TokenDto>(
+                    nameof(LoginWithProviderAsync),
+                    $"Provider: {provider}");
             }
 
-            return MapToTokenDto(session);
+            return session.HandleSession(_logger);
         }
         catch (GotrueException ex)
         {
-            HandleGoTrueException(ex);
-            throw;
+            return ex.HandleGoTrueException(_logger)
+                .MapFailure<TokenDto>();
         }
     }
 
-    public async Task<TokenDto> RefreshTokenAsync(
+    public async Task<Result<TokenDto>> RefreshTokenAsync(
         string accessToken,
         string refreshToken)
     {
@@ -146,36 +153,36 @@ public class AuthService : IAuthService
 
             if (session is null)
             {
-                LogNullSession(nameof(RefreshTokenAsync));
-                AuthenticationException.ThrowInvalidToken();
+                return HandleNullSession<TokenDto>(
+                    nameof(RefreshTokenAsync));
             }
 
-            return MapToTokenDto(session);
+            return session.HandleSession(_logger);
         }
         catch (GotrueException ex)
         {
-            HandleGoTrueException(ex);
-            throw;
+            return ex.HandleGoTrueException(_logger)
+                .MapFailure<TokenDto>();
         }
     }
 
-    public async Task<string> RequestResetPasswordAsync(string email)
+    public async Task<Result<string>> RequestResetPasswordAsync(string email)
     {
         try
         {
             await _supabaseClient.Auth
                 .ResetPasswordForEmail(email);
 
-            return email;
+            return Result.Success(email);
         }
         catch (GotrueException ex)
         {
-            HandleGoTrueException(ex);
-            throw;
+            return ex.HandleGoTrueException(_logger)
+                .MapFailure<string>();
         }
     }
 
-    public async Task<TokenDto> VerifyOtpAsync(string email, string token)
+    public async Task<Result<TokenDto>> VerifyOtpAsync(string email, string token)
     {
         try
         {
@@ -186,20 +193,21 @@ public class AuthService : IAuthService
 
             if (session is null)
             {
-                LogNullSession(nameof(VerifyOtpAsync), $"Email: {email}");
-                AuthenticationException.ThrowInvalidToken();
+                return HandleNullSession<TokenDto>(
+                    nameof(VerifyOtpAsync),
+                    $"Email: {email}");
             }
 
-            return MapToTokenDto(session);
+            return session.HandleSession(_logger);
         }
         catch (GotrueException ex)
         {
-            HandleGoTrueException(ex);
-            throw;
+            return ex.HandleGoTrueException(_logger)
+                .MapFailure<TokenDto>();
         }
     }
 
-    public async Task<TokenDto> ResetPasswordAsync(
+    public async Task<Result<TokenDto>> ResetPasswordAsync(
         string email,
         string newPassword,
         TokenDto tokenDto)
@@ -212,22 +220,23 @@ public class AuthService : IAuthService
 
             if (session is null)
             {
-                LogNullSession(nameof(ResetPasswordAsync), $"Email: {email}");
-                AuthenticationException.ThrowInvalidToken();
+                return HandleNullSession<TokenDto>(
+                    nameof(ResetPasswordAsync),
+                    $"Email: {email}");
             }
 
             await TryUpdatePasswordAsync(newPassword);
 
-            return MapToTokenDto(session);
+            return session.HandleSession(_logger);
         }
         catch (GotrueException ex)
         {
-            HandleGoTrueException(ex);
-            throw;
+            return ex.HandleGoTrueException(_logger)
+                .MapFailure<TokenDto>();
         }
     }
 
-    public async Task DeleteAccountAsync(string id)
+    public async Task<Result> DeleteAccountAsync(string id)
     {
         try
         {
@@ -239,16 +248,18 @@ public class AuthService : IAuthService
 
             if (user is null)
             {
-                AuthenticationException.ThrowUserNotFound(id);
+                return Result.Failure(
+                    AuthErrors.UserNotFound(id));
             }
 
             await adminAuthClient
                 .DeleteUser(id);
+
+            return Result.Success();
         }
         catch (GotrueException ex)
         {
-            HandleGoTrueException(ex);
-            throw;
+            return ex.HandleGoTrueException(_logger);
         }
     }
 
@@ -273,62 +284,13 @@ public class AuthService : IAuthService
         }
     }
 
-    private void LogNullSession(string context, string? details = null)
+    private Result<T> HandleNullSession<T>(string context, string? details = default)
     {
         _logger.LogWarning(
             "Session is null. Context: {Context}, Details: {Details}",
             context,
             details ?? "Without any details");
-    }
 
-    private static TokenDto MapToTokenDto(Session session)
-    {
-        if (session?.AccessToken is null || session.RefreshToken is null)
-            AuthenticationException.ThrowNullSession();
-
-        return new TokenDto(
-            session.AccessToken!,
-            session.RefreshToken!,
-            session.ExpiresIn,
-            session.TokenType ?? "bearer");
-    }
-
-    private static bool IsFakeUser(User user)
-    {
-        return user?.Email?.Contains("fakeemail", StringComparison.OrdinalIgnoreCase) == true;
-    }
-
-    private void HandleGoTrueException(GotrueException ex)
-    {
-        _logger.LogError(ex, "Supabase Gotrue error occurred");
-
-        var error = TryDeserializeError(ex.Message);
-
-        if (error != null)
-        {
-            throw error.ErrorCode.ToLowerInvariant() switch
-            {
-                var code when code.Contains("invalid") => new AuthenticationException(error.Message),
-                var code when code.Contains("not_found") => new AuthenticationException(error.Message),
-                var code when code.Contains("already_exists") || code.Contains("duplicate") =>
-                    new AuthenticationException(error.Message),
-                var code when code.Contains("expired") => new AuthenticationException("Token has expired."),
-                _ => new AuthenticationException(error.Message)
-            };
-        }
-
-        throw new AuthenticationException(ex.Message);
-    }
-
-    private SupabaseError? TryDeserializeError(string message)
-    {
-        try
-        {
-            return JsonSerializer.Deserialize<SupabaseError>(message);
-        }
-        catch
-        {
-            return null;
-        }
+        return Result.Failure<T>(AuthErrors.NullSession);
     }
 }

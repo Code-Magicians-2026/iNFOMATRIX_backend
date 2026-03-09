@@ -1,8 +1,10 @@
-﻿using Infomatrix.Core.Application.Abstractions;
-using Infomatrix.Core.Domain.Entities;
-using Infomatrix.Core.Api.Features.Users.Requests;
-using Infomatrix.Core.Api.Features.Users.Responses;
+﻿using Infomatrix.Core.Api.Base;
+using Infomatrix.Core.Api.Extensions;
 using Infomatrix.Core.Api.Features.Users.Mappers;
+using Infomatrix.Core.Api.Features.Users.Responses;
+using Infomatrix.Core.Application.Abstractions.Messaging;
+using Infomatrix.Core.Application.Features.User.GetById;
+using Infomatrix.Core.Shared.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,112 +13,26 @@ namespace Infomatrix.Core.Api.Features.Users;
 [Authorize]
 [ApiController]
 [Route("api/users")]
-public class UserController : ControllerBase
+public class UserController : BaseController
 {
-    private readonly IRepository<UserEntity> _userRepository;
-
-    public UserController(
-        IRepository<UserEntity> userRepository)
+    public UserController(ISender sender)
+        : base(sender)
     {
-        _userRepository = userRepository;
-    }
-
-    [HttpGet]
-    [ProducesResponseType<IEnumerable<UserResponse>>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<UserResponse>>> GetAllAsync(
-        CancellationToken ct)
-    {
-        var users = await _userRepository
-            .GetAllAsync(ct);
-
-        return Ok(users.ToResponse());
     }
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<UserResponse>> GetAsync(
+    [ProducesResponseType<UserResponse>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAsync(
         Guid id,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
-        var user = await _userRepository
-            .GetByIdAsync(id, ct);
+        var query = new GetUserByIdQuery(id);
 
-        if (user is null)
-        {
-            return NotFound();
-        }
+        var result = await _sender
+            .Query(query, cancellationToken);
 
-        return user.ToResponse();
-    }
-
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<ActionResult<UserResponse>> CreateAsync(
-        [FromBody] CreateUserRequest request,
-        CancellationToken ct)
-    {
-        var user = request.ToEntity();
-
-        await _userRepository
-            .AddAsync(user, ct);
-        await _userRepository
-            .SaveChangesAsync(ct);
-
-        var response = user
-            .ToResponse();
-
-        return CreatedAtAction(
-            "Get",
-            new { id = user.Id },
-            response);
-    }
-
-    [HttpPut("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateAsync(
-        Guid id,
-        [FromBody] UpdateUserRequest request,
-        CancellationToken ct)
-    {
-        var user = await _userRepository
-            .GetByIdAsync(id, ct);
-
-        if (user is null)
-        {
-            return NotFound();
-        }
-
-        user.Update(request.FullName);
-
-        _userRepository
-            .Update(user);
-        await _userRepository
-            .SaveChangesAsync(ct);
-
-        return NoContent();
-    }
-
-    [HttpDelete("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteAsync(
-        Guid id,
-        CancellationToken ct)
-    {
-        var user = await _userRepository
-            .GetByIdAsync(id, ct);
-
-        if (user is null)
-        {
-            return NotFound();
-        }
-
-        _userRepository
-            .Delete(user);
-        await _userRepository
-            .SaveChangesAsync(ct);
-
-        return NoContent();
+        return result
+            .Map(r => r.ToResponse())
+            .ToActionResult();
     }
 }
