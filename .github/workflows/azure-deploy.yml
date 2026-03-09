@@ -8,10 +8,9 @@ on:
       - main
 
 env:
-  AZURE_WEBAPP_PACKAGE_PATH: './Infomatrix.Api/publish'
-  DOTNET_VERSION: '10.0.X'
-  SOLUTION_PATH: 'Infomatrix.slnx'
-  API_PROJECT_PATH: 'Infomatrix.Api'
+  AZURE_WEBAPP_PACKAGE_PATH: './publish'
+  DOTNET_VERSION: '10.0.x'
+  API_PROJECT_PATH: 'src/Services/Infomatrix.Core/Infomatrix.Core.Api/Infomatrix.Core.Api.csproj'
   PUBLISH_DIR: './publish'
 
 jobs:
@@ -27,16 +26,16 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore
-        run: dotnet restore ${{ env.SOLUTION_PATH }}
+        run: dotnet restore ${{ env.API_PROJECT_PATH }}
 
       - name: Build
-        run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
+        run: dotnet build ${{ env.API_PROJECT_PATH }} --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --verbosity normal
+        run: dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Publish
-        run: dotnet publish ${{ env.API_PROJECT_PATH }} --configuration Release --no-restore --no-build --property:PublishDir=${{ env.PUBLISH_DIR }}
+        run: dotnet publish ${{ env.API_PROJECT_PATH }} --configuration Release --output ${{ env.PUBLISH_DIR }}
 
       - name: Publish Artifacts
         uses: actions/upload-artifact@v4
