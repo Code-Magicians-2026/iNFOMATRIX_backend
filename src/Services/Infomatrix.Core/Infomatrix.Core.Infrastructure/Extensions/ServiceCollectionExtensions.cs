@@ -33,6 +33,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddDistributedMemoryCache();
         services.AddScoped<IAIService, AIService>();
+        services.AddScoped<IVisionService, VisionService>();
 
         services.AddOptions<SupabaseOptions>()
             .Bind(configuration.GetSection(SupabaseOptions.SectionName))
