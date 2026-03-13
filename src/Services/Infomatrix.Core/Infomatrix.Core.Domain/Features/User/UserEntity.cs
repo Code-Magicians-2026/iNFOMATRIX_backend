@@ -4,43 +4,25 @@ namespace Infomatrix.Core.Domain.Features.User;
 
 public class UserEntity : BaseEntity
 {
-    public string FullName { get; private set; } = string.Empty;
+    public string FirstName { get; protected set; } = string.Empty;
 
-    public string Email { get; private set; } = string.Empty;
+    public string LastName { get; protected set; } = string.Empty;
 
-    private UserEntity()
+    public string Email { get; protected set; } = string.Empty;
+
+    protected UserEntity()
     {
     }
 
-    private UserEntity(
+    protected UserEntity(
         Guid id,
-        string fullName,
+        string firstName,
+        string lastName,
         string email)
         : base(id)
     {
-        FullName = fullName;
+        FirstName = firstName;
+        LastName = lastName;
         Email = email;
-    }
-
-    public static UserEntity Create(
-        Guid id,
-        string fullName,
-        string email)
-    {
-        UserException
-            .ThrowIfFullNameInvalid(fullName);
-
-        UserException
-            .ThrowIfEmailInvalid(email);
-
-        return new UserEntity(id, fullName, email);
-    }
-
-    public void Update(string fullName)
-    {
-        UserException
-            .ThrowIfFullNameInvalid(fullName);
-
-        FullName = fullName;
     }
 }

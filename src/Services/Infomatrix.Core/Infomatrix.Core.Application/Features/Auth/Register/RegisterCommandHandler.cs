@@ -33,7 +33,10 @@ internal sealed class RegisterCommandHandler
             return Result.Failure<EmailDto>(result.Error);
         }
 
-        var signUpDto = new SignUpCacheDto(request.FullName, request.Password);
+        var signUpDto = new SignUpCacheDto(
+            request.FirstName,
+            request.LastName,
+            request.Password);
 
         await _cacheService.SetAsync(
             key: CacheKeys.SignUp(request.Email),

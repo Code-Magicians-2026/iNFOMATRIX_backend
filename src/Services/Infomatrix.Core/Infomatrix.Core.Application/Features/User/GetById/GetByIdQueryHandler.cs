@@ -20,19 +20,20 @@ internal sealed class GetByIdQueryHandler
         GetUserByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var user = await _userRepository
-            .GetByIdAsync(request.Id, cancellationToken);
+        throw new NotImplementedException();
+        //var user = await _userRepository
+        //    .GetByIdAsync(request.Id, cancellationToken);
 
-        if (user is null)
-        {
-            return Result.Failure<UserDto>(UserErrors.NotFound(request.Id));
-        }
+        //if (user is null)
+        //{
+        //    return Result.Failure<UserDto>(UserErrors.NotFound(request.Id));
+        //}
 
-        var userDto = new UserDto(
-            user.Id,
-            user.FullName,
-            user.Email);
+        //var userDto = new UserDto(
+        //    user.Id,
+        //    user.FullName,
+        //    user.Email);
 
-        return Result.Success(userDto);
+        //return Result.Success(userDto);
     }
 }
