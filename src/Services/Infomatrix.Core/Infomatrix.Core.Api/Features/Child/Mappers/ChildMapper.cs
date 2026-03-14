@@ -11,6 +11,7 @@ public static class ChildMapper
             dto.Id,
             dto.FirstName,
             dto.LastName,
+            dto.Email,
             dto.Experience);
     }
 }

@@ -73,6 +73,7 @@ public class ChildController : BaseController
             c.Id,
             c.FirstName,
             c.LastName,
+            c.Email,
             c.Experience
         )).ToList();
 

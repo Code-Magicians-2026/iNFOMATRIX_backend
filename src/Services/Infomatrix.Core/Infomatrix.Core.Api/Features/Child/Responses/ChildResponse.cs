@@ -4,4 +4,5 @@ public record ChildResponse(
     Guid Id,
     string FirstName,
     string LastName,
+    string Email,
     int Experience);
