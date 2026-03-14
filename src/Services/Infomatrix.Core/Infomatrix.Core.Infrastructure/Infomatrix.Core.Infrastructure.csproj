@@ -17,11 +17,16 @@
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.AzureOpenAI" Version="1.73.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.73.0" />
 	  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+     <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
 	  <PackageReference Include="Supabase" Version="1.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Infomatrix.Core.Application\Infomatrix.Core.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\Shared\Infomatrix.Contracts\AI\*.cs" Link="Contracts\%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

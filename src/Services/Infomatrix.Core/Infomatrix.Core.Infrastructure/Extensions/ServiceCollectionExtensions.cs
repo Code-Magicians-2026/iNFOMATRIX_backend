@@ -1,7 +1,7 @@
 using Infomatrix.Core.Application.Abstractions.Repositories;
 using Infomatrix.Core.Application.Abstractions.Services;
-using Infomatrix.Core.Infrastructure.AI;
 using Infomatrix.Core.Infrastructure.AI.Options;
+using Infomatrix.Core.Infrastructure.AI.Services;
 using Infomatrix.Core.Infrastructure.Auth;
 using Infomatrix.Core.Infrastructure.Cache;
 using Infomatrix.Core.Infrastructure.Persistence;
@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Microsoft.SemanticKernel;
+using Refit;
 using SupabaseClient = Supabase.Client;
 using SupabaseSDKOptions = Supabase.SupabaseOptions;
 
@@ -25,15 +25,16 @@ public static class ServiceCollectionExtensions
     {
         services.AddSupabase(configuration);
         services.AddDatabase(configuration);
-        services.AddAI(configuration);
+        services.AddAiMicroservice(configuration);
 
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddDistributedMemoryCache();
-        services.AddScoped<IAIService, AIService>();
-        services.AddScoped<IVisionService, VisionService>();
+        services.AddScoped<AiMicroserviceService>();
+        services.AddScoped<IAIService>(sp => sp.GetRequiredService<AiMicroserviceService>());
+        services.AddScoped<IVisionService>(sp => sp.GetRequiredService<AiMicroserviceService>());
 
         services.AddOptions<SupabaseOptions>()
             .Bind(configuration.GetSection(SupabaseOptions.SectionName))
@@ -45,8 +46,8 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services.AddOptions<AIOptions>()
-            .Bind(configuration.GetSection(AIOptions.SectionName))
+        services.AddOptions<AiServiceOptions>()
+            .Bind(configuration.GetSection(AiServiceOptions.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
@@ -74,20 +75,20 @@ public static class ServiceCollectionExtensions
         });
     }
 
-    private static IServiceCollection AddAI(
+    private static IServiceCollection AddAiMicroservice(
         this IServiceCollection services,
         IConfiguration configuration)
     {
         var options = configuration
-            .GetSection(AIOptions.SectionName)
-            .Get<AIOptions>();
+            .GetSection(AiServiceOptions.SectionName)
+            .Get<AiServiceOptions>()
+            ?? throw new InvalidOperationException("AI service settings are missing.");
 
-        var builder = services.AddKernel();
-
-        builder.AddAzureOpenAIChatCompletion(
-            deploymentName: options.DeploymentName,
-            endpoint: options.Endpoint,
-            apiKey: options.ApiKey);
+        services.AddRefitClient<IAiMicroserviceApi>()
+            .ConfigureHttpClient(client =>
+            {
+                client.BaseAddress = new Uri(options.BaseAddress);
+            });
 
         return services;
     }

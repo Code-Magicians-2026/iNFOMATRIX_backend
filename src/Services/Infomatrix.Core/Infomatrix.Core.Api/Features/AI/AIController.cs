@@ -10,7 +10,6 @@ using Infomatrix.Core.Application.Features.AI.GetAiResponse;
 using Infomatrix.Core.Application.Features.AI.GetVisionAiResponse;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace Infomatrix.Core.Api.Features.AI;
 
@@ -19,54 +18,52 @@ namespace Infomatrix.Core.Api.Features.AI;
 [ApiController]
 public class AIController : BaseController
 {
-    private readonly IChatCompletionService _chatService;
-
-    public AIController(ISender sender, IChatCompletionService chatService)
+    public AIController(ISender sender)
         : base(sender)
     {
-        _chatService = chatService;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> GetAIResponseAsync(
-        [FromBody] AIRequest request,
-        CancellationToken cancellationToken)
-    {
-        var command = new GetAiResponseCommand(
-            GetUserId(),
-            request.Prompt);
+    //[HttpPost]
+    //public async Task<IActionResult> GetAIResponseAsync(
+    //    [FromBody] AIRequest request,
+    //    CancellationToken cancellationToken)
+    //{
+    //    var command = new GenerateQuestCommand(
+    //        GetUserId(),
+    //        request.Prompt);
 
-        var result = await _sender
-            .Send(command, cancellationToken);
+    //    var result = await _sender
+    //        .Send(command, cancellationToken);
 
-        return result
-            .ToActionResult();
-    }
+    //    return result
+    //        .ToActionResult();
+    //}
 
-    [HttpPost("vision")]
-    public async Task<IActionResult> GetAIResponseAsync(
-        [FromForm] AIRequest request,
-        IFormFile file,
-        CancellationToken cancellationToken)
-    {
-        using var stream = file
-            .OpenReadStream();
+    //[HttpPost("vision")]
+    //public async Task<IActionResult> GetAIResponseAsync(
+    //    [FromForm] AIRequest request,
+    //    IFormFile file,
+    //    CancellationToken cancellationToken)
+    //{
+    //    using var stream = file
+    //        .OpenReadStream();
 
-        ImageDto image = new ImageDto(
-            stream,
-            file.ContentType,
-            file.Name);
+    //    ImageDto image = new ImageDto(
+    //        stream,
+    //        file.ContentType,
+    //        file.Name);
 
-        var command = new GetVisionAiResponseCommand(
-            request.Prompt,
-            image);
+    //    var command = new GenerateQuestWithImageCommand(
+    //        GetUserId(),
+    //        request.Prompt,
+    //        image);
 
-        var result = await _sender
-            .Send(command, cancellationToken);
+    //    var result = await _sender
+    //        .Send(command, cancellationToken);
 
-        return result
-            .ToActionResult();
-    }
+    //    return result
+    //        .ToActionResult();
+    //}
 
     [HttpPost("quest")]
     public async Task<IActionResult> GenerateQuestAsync(
