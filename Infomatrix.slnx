@@ -4,6 +4,9 @@
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/Infomatrix.AI/">
+    <Project Path="src/Services/Infomatrix.AI/Infomatrix.AI/Infomatrix.AI.csproj" Id="94476adf-7556-403a-848e-ad7935774af7" />
+  </Folder>
   <Folder Name="/src/Services/Infomatrix.Core/" />
   <Folder Name="/src/Services/Infomatrix.Core/Infomatrix.Core.Api/">
     <Project Path="src/Services/Infomatrix.Core/Infomatrix.Core.Api/Infomatrix.Core.Api.csproj" />
