@@ -20,6 +20,7 @@ internal sealed class GetVisionAiResponseCommandHandler
         CancellationToken cancellationToken)
     {
         return await _visionService.GetResponseAsync(
+            string.Empty,
             request.Prompt,
             request.Image,
             cancellationToken);

@@ -6,6 +6,7 @@ namespace Infomatrix.Core.Application.Abstractions.Services;
 public interface IVisionService
 {
     Task<Result<string>> GetResponseAsync(
+        string systemPrompt,
         string prompt,
         ImageDto image,
         CancellationToken cancellationToken);

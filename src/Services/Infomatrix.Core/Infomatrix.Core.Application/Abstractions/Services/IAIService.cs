@@ -6,6 +6,7 @@ public interface IAIService
 {
     Task<Result<string>> GetResponseAsync(
         Guid userId,
+        string systemMessage,
         string userPrompt,
         Guid? chatId,
         CancellationToken cancellationToken = default);

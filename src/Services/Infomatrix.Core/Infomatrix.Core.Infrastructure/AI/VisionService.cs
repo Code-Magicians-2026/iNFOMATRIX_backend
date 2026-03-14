@@ -22,11 +22,14 @@ public class VisionService : IVisionService
     }
 
     public async Task<Result<string>> GetResponseAsync(
+        string systemPrompt,
         string prompt,
         ImageDto image,
         CancellationToken cancellationToken)
     {
         var chat = new ChatHistory();
+
+        chat.AddSystemMessage(systemPrompt);
 
         var message = new ChatMessageContent(
             AuthorRole.User,
