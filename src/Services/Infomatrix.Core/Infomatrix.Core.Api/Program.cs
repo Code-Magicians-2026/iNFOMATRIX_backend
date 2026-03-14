@@ -21,20 +21,20 @@ var app = builder
     .Build();
 
 // Apply migrations
-await using (var scope = app.Services.CreateAsyncScope())
-{
-    try
-    {
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await db.Database.MigrateAsync();
-    }
-    catch (Exception ex)
-    {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while migrating the database");
-        throw;
-    }
-}
+//await using (var scope = app.Services.CreateAsyncScope())
+//{
+//    try
+//    {
+//        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//        await db.Database.MigrateAsync();
+//    }
+//    catch (Exception ex)
+//    {
+//        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+//        logger.LogError(ex, "An error occurred while migrating the database");
+//        throw;
+//    }
+//}
 
 app.UseMiddleware<ExceptionMiddleware>();
 

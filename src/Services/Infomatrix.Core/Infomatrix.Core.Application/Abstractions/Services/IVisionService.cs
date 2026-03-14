@@ -10,4 +10,11 @@ public interface IVisionService
         string prompt,
         ImageDto image,
         CancellationToken cancellationToken);
+
+    Task<Result<string>> GetResponseAsync(
+        string systemPrompt,
+        string prompt,
+        ImageDto image1,
+        ImageDto image2,
+        CancellationToken cancellationToken);
 }
