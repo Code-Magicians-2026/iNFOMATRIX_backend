@@ -2,6 +2,8 @@ using Infomatrix.Core.Api.Extensions;
 using Infomatrix.Core.Api.Middlewares;
 using Infomatrix.Core.Application.Extensions;
 using Infomatrix.Core.Infrastructure.Extensions;
+using Infomatrix.Core.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 var builder = WebApplication
@@ -19,20 +21,20 @@ var app = builder
     .Build();
 
 // Apply migrations
-//await using (var scope = app.Services.CreateAsyncScope())
-//{
-//    try
-//    {
-//        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-//        await db.Database.MigrateAsync();
-//    }
-//    catch (Exception ex)
-//    {
-//        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-//        logger.LogError(ex, "An error occurred while migrating the database");
-//        throw;
-//    }
-//}
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await db.Database.MigrateAsync();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database");
+        throw;
+    }
+}
 
 app.UseMiddleware<ExceptionMiddleware>();
 

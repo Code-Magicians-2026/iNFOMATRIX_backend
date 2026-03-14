@@ -32,8 +32,4 @@
 		<ProjectReference Include="..\Infomatrix.Core.Infrastructure\Infomatrix.Core.Infrastructure.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Features\Family\" />
-	</ItemGroup>
-
 </Project>
