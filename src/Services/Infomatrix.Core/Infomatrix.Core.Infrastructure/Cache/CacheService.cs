@@ -45,7 +45,7 @@ public class CacheService : ICacheService
                 ?? DefaultExpirationTime
         };
 
-        await _cache.SetStringAsync(key, json, cancellationToken);
+        await _cache.SetStringAsync(key, json, options, cancellationToken);
     }
 
     public async Task RemoveAsync(

@@ -203,3 +203,5 @@ static ImageContent ToImageContent(AiImageDto image)
 
     return new ImageContent(new ReadOnlyMemory<byte>(bytes), contentType);
 }
+
+public partial class Program;

@@ -15,4 +15,8 @@
     <Project Path="src/Services/Infomatrix.Core/Infomatrix.Core.Infrastructure/Infomatrix.Core.Infrastructure.csproj" Id="f873ba46-139f-4005-94b3-adef9d5be68f" />
     <Project Path="src/Services/Infomatrix.Core/Infomatrix.Core.Shared/Infomatrix.Core.Shared.csproj" Id="58aae43f-e1e8-4943-bded-f1132f5e2639" />
   </Folder>
+  <Folder Name="/src/Tests/" />
+  <Folder Name="/src/Tests/Infomatrix.AI.Tests/">
+    <Project Path="src/Tests/Infomatrix.AI.Tests/Infomatrix.AI.Tests.csproj" />
+  </Folder>
 </Solution>
