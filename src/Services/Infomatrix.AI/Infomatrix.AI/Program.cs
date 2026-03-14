@@ -59,7 +59,10 @@ ai.MapPost("/chat", async (
 
     chat.AddUserMessage(request.Prompt);
 
-    var response = await chatService.GetChatMessageContentAsync(chat, cancellationToken: cancellationToken);
+    var response = await ExecuteWithRetryAsync(
+        ct => chatService.GetChatMessageContentAsync(chat, cancellationToken: ct),
+        cancellationToken);
+
     return Results.Ok(new AiResponse(response.Content ?? string.Empty));
 });
 
@@ -86,7 +89,10 @@ ai.MapPost("/quest", async (
 
     chat.AddUserMessage(request.Prompt);
 
-    var response = await chatService.GetChatMessageContentAsync(chat, cancellationToken: cancellationToken);
+    var response = await ExecuteWithRetryAsync(
+        ct => chatService.GetChatMessageContentAsync(chat, cancellationToken: ct),
+        cancellationToken);
+
     return Results.Ok(new AiResponse(response.Content ?? string.Empty));
 });
 
@@ -117,7 +123,10 @@ ai.MapPost("/summary-vision", async (
 
     chat.Add(message);
 
-    var response = await chatService.GetChatMessageContentAsync(chat, cancellationToken: cancellationToken);
+    var response = await ExecuteWithRetryAsync(
+        ct => chatService.GetChatMessageContentAsync(chat, cancellationToken: ct),
+        cancellationToken);
+
     return Results.Ok(new AiResponse(response.Content ?? string.Empty));
 });
 
@@ -142,12 +151,55 @@ static async Task<string> GetVisionResponseAsync(
 
     chat.Add(message);
 
-    var response = await chatService.GetChatMessageContentAsync(chat, cancellationToken: cancellationToken);
+    var response = await ExecuteWithRetryAsync(
+        ct => chatService.GetChatMessageContentAsync(chat, cancellationToken: ct),
+        cancellationToken);
+
     return response.Content ?? string.Empty;
 }
 
+static async Task<T> ExecuteWithRetryAsync<T>(
+    Func<CancellationToken, Task<T>> operation,
+    CancellationToken cancellationToken)
+{
+    const int maxAttempts = 3;
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            return await operation(cancellationToken);
+        }
+        catch (Exception ex) when (IsTransient(ex) && attempt < maxAttempts)
+        {
+            var delay = TimeSpan.FromMilliseconds(250 * attempt);
+            await Task.Delay(delay, cancellationToken);
+        }
+    }
+
+    return await operation(cancellationToken);
+}
+
+static bool IsTransient(Exception ex) =>
+    ex is HttpRequestException
+    or TaskCanceledException
+    or Microsoft.SemanticKernel.HttpOperationException;
+
 static ImageContent ToImageContent(AiImageDto image)
 {
-    var bytes = Convert.FromBase64String(image.Base64Data);
-    return new ImageContent(new ReadOnlyMemory<byte>(bytes), image.ContentType);
+    var base64 = image.Base64Data;
+
+    const string marker = ";base64,";
+    var markerIndex = base64.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+    if (markerIndex >= 0)
+    {
+        base64 = base64[(markerIndex + marker.Length)..];
+    }
+
+    var bytes = Convert.FromBase64String(base64);
+    var contentType = string.IsNullOrWhiteSpace(image.ContentType)
+        ? "image/jpeg"
+        : image.ContentType;
+
+    return new ImageContent(new ReadOnlyMemory<byte>(bytes), contentType);
 }
