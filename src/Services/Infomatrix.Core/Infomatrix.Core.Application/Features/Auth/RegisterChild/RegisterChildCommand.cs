@@ -44,6 +44,16 @@ internal sealed class RegisterChildCommandHandler
                 Error.Failure("Child.Error", "Child had not created"));
         }
 
+        var childExists = await _childRepository.AnyAsync(
+            c => c.Email == registerResult.Value.Email,
+            cancellationToken);
+
+        if (childExists)
+        {
+            return Result.Failure<ChildDto>(
+                Error.Failure("Child.AlreadyExists", "Child already exists."));
+        }
+
         var child = ChildEntity.Create(
             registerResult.Value.Id,
             command.FirstName,

@@ -69,34 +69,4 @@ public class FamilyController : BaseController
 
         return NotFound("Family not found for the current user.");
     }
-
-    [HttpGet("children")]
-    public async Task<IActionResult> GetChildren(CancellationToken cancellationToken)
-    {
-        var userId = GetUserId();
-
-        var parent = await _dbContext.Parents
-            .Include(p => p.Family)
-            .ThenInclude(f => f.Children)
-            .FirstOrDefaultAsync(p => p.Id == userId, cancellationToken);
-
-        if (parent == null)
-        {
-            return Forbid("User is not a parent.");
-        }
-
-        if (parent.Family == null)
-        {
-            return NotFound("Family not found for the current user.");
-        }
-
-        var children = parent.Family.Children.Select(c => new ChildResponse(
-            c.Id,
-            c.FirstName,
-            c.LastName,
-            c.Experience
-        )).ToList();
-
-        return Ok(children);
-    }
 }
