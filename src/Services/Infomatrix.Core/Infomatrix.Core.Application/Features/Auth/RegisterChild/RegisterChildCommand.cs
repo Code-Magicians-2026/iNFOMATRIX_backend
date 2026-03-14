@@ -33,6 +33,19 @@ internal sealed class RegisterChildCommandHandler
         RegisterChildCommand command,
         CancellationToken cancellationToken)
     {
+        var nameExists = await _childRepository.AnyAsync(
+            c => c.FamilyId == command.FamilyId &&
+                 c.FirstName.ToLower() == command.FirstName.ToLower(),
+            cancellationToken);
+
+        if (nameExists)
+        {
+            return Result.Failure<ChildDto>(
+                Error.BadRequest(
+                    "Child.NameExists",
+                    $"A child with the name '{command.FirstName}' is already registered in this family."));
+        }
+
         var registerResult = await _authService.RegisterChildAsync(
             command.Email,
             command.FirstName,
@@ -42,16 +55,6 @@ internal sealed class RegisterChildCommandHandler
         {
             return Result.Failure<ChildDto>(
                 Error.Failure("Child.Error", "Child had not created"));
-        }
-
-        var childExists = await _childRepository.AnyAsync(
-            c => c.Email == registerResult.Value.Email,
-            cancellationToken);
-
-        if (childExists)
-        {
-            return Result.Failure<ChildDto>(
-                Error.Failure("Child.AlreadyExists", "Child already exists."));
         }
 
         var child = ChildEntity.Create(
@@ -71,6 +74,7 @@ internal sealed class RegisterChildCommandHandler
             child.Id,
             child.FirstName,
             child.LastName,
+            child.Email,
             child.Experience));
     }
 }
