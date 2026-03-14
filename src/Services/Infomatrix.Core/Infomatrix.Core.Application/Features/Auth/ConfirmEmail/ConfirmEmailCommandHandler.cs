@@ -4,7 +4,7 @@ using Infomatrix.Core.Application.Abstractions.Services;
 using Infomatrix.Core.Application.Constants;
 using Infomatrix.Core.Application.DTOs.Auth;
 using Infomatrix.Core.Domain.Features.Auth;
-using Infomatrix.Core.Domain.Features.User;
+using Infomatrix.Core.Domain.Features.Parent;
 using Infomatrix.Core.Shared;
 
 namespace Infomatrix.Core.Application.Features.Auth.ConfirmEmail;
@@ -14,16 +14,16 @@ internal sealed class ConfirmEmailCommandHandler
 {
     private readonly IAuthService _authService;
     private readonly ICacheService _cacheService;
-    private readonly IUserRepository _userRepository;
+    private readonly IRepository<ParentEntity> _parentRepository;
 
     public ConfirmEmailCommandHandler(
         IAuthService authService,
         ICacheService cacheService,
-        IUserRepository userRepository)
+        IRepository<ParentEntity> parentRepository)
     {
         _authService = authService;
         _cacheService = cacheService;
-        _userRepository = userRepository;
+        _parentRepository = parentRepository;
     }
 
     public async Task<Result<TokenDto>> Handle(
@@ -51,16 +51,17 @@ internal sealed class ConfirmEmailCommandHandler
             CacheKeys.SignUp(request.Email),
             cancellationToken);
 
-        var user = UserEntity
+        var parent = ParentEntity
             .Create(
                 result.Value.UserId,
-                signUpDto.FullName,
+                signUpDto.FirstName,
+                signUpDto.LastName,
                 request.Email);
 
-        await _userRepository
-            .AddAsync(user, cancellationToken);
+        await _parentRepository
+            .AddAsync(parent, cancellationToken);
         
-        await _userRepository
+        await _parentRepository
             .SaveChangesAsync(cancellationToken);
 
         return Result

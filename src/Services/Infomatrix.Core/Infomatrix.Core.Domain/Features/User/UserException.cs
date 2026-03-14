@@ -9,7 +9,7 @@ public class UserException : DomainException
     {
     }
 
-    public static void ThrowIfFullNameInvalid(string fullName)
+    public static void ThrowIfNameInvalid(string fullName)
     {
         if (string.IsNullOrWhiteSpace(fullName))
             throw new UserException("Full name cannot be null or empty.");

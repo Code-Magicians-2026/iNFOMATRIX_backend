@@ -4,7 +4,8 @@ using Infomatrix.Core.Application.DTOs.Auth;
 namespace Infomatrix.Core.Application.Features.Auth.Register;
 
 public sealed record RegisterCommand(
-    string FullName,
+    string FirstName,
+    string LastName,
     string Email,
     string Password)
     : ICommand<EmailDto>;

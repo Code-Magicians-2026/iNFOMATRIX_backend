@@ -1,5 +1,6 @@
 using Infomatrix.Core.Application.Abstractions.Services;
 using Infomatrix.Core.Application.DTOs.Auth;
+using Infomatrix.Core.Application.DTOs.User;
 using Infomatrix.Core.Application.Exceptions;
 using Infomatrix.Core.Domain.Features.Auth;
 using Infomatrix.Core.Infrastructure.Extensions.Supabase;
@@ -34,7 +35,16 @@ public class AuthService : IAuthService
     {
         try
         {
-            var session = await _supabaseClient.Auth.SignUp(email, password);
+            var options = new SignUpOptions
+            {
+                Data = new Dictionary<string, object>
+                {
+                    { "role", "parent" }
+                }
+            };
+
+            var session = await _supabaseClient.Auth
+                .SignUp(email, password, options);
 
             if (session?.User is null)
                 return Result.Failure<string>(AuthErrors.UnknownError);
@@ -48,6 +58,47 @@ public class AuthService : IAuthService
         {
             return ex.HandleGoTrueException(_logger)
                 .MapFailure<string>();
+        }
+    }
+
+    public async Task<Result<ChildIdentityDto>> RegisterChildAsync(
+        string parentEmail,
+        string childFirstName,
+        string password)
+    {
+        try
+        {
+            var parts = parentEmail.Split('@');
+            var childSubEmail = $"{parts[0]}+{childFirstName.ToLower()}@{parts[1]}";
+
+            var adminAuthClient = _supabaseClient.AdminAuth(_secretKey);
+
+            var userAttributes = new AdminUserAttributes
+            {
+                Email = childSubEmail,
+                Password = password,
+                EmailConfirm = true,
+                UserMetadata = new Dictionary<string, object>
+                {
+                    { "role", "child" }
+                }
+            };
+
+            var user = await adminAuthClient.CreateUser(userAttributes);
+
+            if (user?.Id is null)
+            {
+                return Result.Failure<ChildIdentityDto>(AuthErrors.UnknownError);
+            }
+
+            return Result.Success(new ChildIdentityDto(
+                Guid.Parse(user.Id),
+                user.Email));
+        }
+        catch (GotrueException ex)
+        {
+            return ex.HandleGoTrueException(_logger)
+                .MapFailure<ChildIdentityDto>();
         }
     }
 
@@ -96,38 +147,6 @@ public class AuthService : IAuthService
                 return HandleNullSession<TokenDto>(
                     nameof(LoginAsync),
                     $"Email: {email}");
-            }
-
-            return session.HandleSession(_logger);
-        }
-        catch (GotrueException ex)
-        {
-            return ex.HandleGoTrueException(_logger)
-                .MapFailure<TokenDto>();
-        }
-    }
-
-    public Task<Result<TokenDto>> LoginWithGoogleAsync(string idToken) =>
-        LoginWithProviderAsync(idToken, Constants.Provider.Google);
-
-    public Task<Result<TokenDto>> LoginWithAppleAsync(string idToken) =>
-        LoginWithProviderAsync(idToken, Constants.Provider.Apple);
-
-    private async Task<Result<TokenDto>> LoginWithProviderAsync(
-        string idToken,
-        Constants.Provider provider)
-    {
-        try
-        {
-            var session = await _supabaseClient.Auth.SignInWithIdToken(
-                provider: provider,
-                idToken: idToken);
-
-            if (session is null)
-            {
-                return HandleNullSession<TokenDto>(
-                    nameof(LoginWithProviderAsync),
-                    $"Provider: {provider}");
             }
 
             return session.HandleSession(_logger);

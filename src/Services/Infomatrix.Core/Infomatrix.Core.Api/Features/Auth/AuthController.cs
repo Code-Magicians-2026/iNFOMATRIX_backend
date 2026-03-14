@@ -50,7 +50,8 @@ public class AuthController : BaseController
         CancellationToken cancellationToken)
     {
         var command = new RegisterCommand(
-            request.FullName,
+            request.FirstName,
+            request.LastName,
             request.Email,
             request.Password);
 

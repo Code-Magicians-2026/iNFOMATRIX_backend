@@ -1,11 +1,15 @@
-﻿using Infomatrix.Core.Domain.Features.User;
+﻿using Infomatrix.Core.Domain.Features.Child;
+using Infomatrix.Core.Domain.Features.Family;
+using Infomatrix.Core.Domain.Features.Parent;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infomatrix.Core.Infrastructure.Persistence;
 
 public class AppDbContext : DbContext
 {
-    public DbSet<UserEntity> Users { get; set; }
+    public DbSet<ParentEntity> Parents { get; set; }
+    public DbSet<ChildEntity> Children { get; set; }
+    public DbSet<FamilyEntity> Families { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
@@ -14,8 +18,13 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var entity = modelBuilder.Entity<UserEntity>();
+        var parentEntity = modelBuilder.Entity<ParentEntity>();
+        parentEntity.HasKey(x => x.Id);
 
-        entity.HasKey(x => x.Id);
+        var childEntity = modelBuilder.Entity<ChildEntity>();
+        childEntity.HasKey(x => x.Id);
+
+        var familyEntity = modelBuilder.Entity<FamilyEntity>();
+        familyEntity.HasKey(x => x.Id);
     }
 }
