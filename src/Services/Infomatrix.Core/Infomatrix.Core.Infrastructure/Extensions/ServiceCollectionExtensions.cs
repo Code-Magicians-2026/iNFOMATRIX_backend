@@ -60,17 +60,17 @@ public static class ServiceCollectionExtensions
         return services.AddDbContext<AppDbContext>(options =>
         {
             options.UseNpgsql(configuration["Database:ConnectionString"],
-                providerOptions =>
-                {
-                    providerOptions.EnableRetryOnFailure(
-                        maxRetryCount: 5,
-                        maxRetryDelay: TimeSpan.FromSeconds(5),
-                        errorCodesToAdd: ["23505"]);
-                    providerOptions.CommandTimeout(60);
-                });
+            providerOptions =>
+            {
+                providerOptions.EnableRetryOnFailure(
+                    maxRetryCount: 2,
+                    maxRetryDelay: TimeSpan.FromSeconds(2),
+                    null);
 
-            options.EnableSensitiveDataLogging(false);
-            options.EnableDetailedErrors(false);
+                providerOptions.CommandTimeout(15);
+            });
+            options.EnableSensitiveDataLogging(true);
+            options.EnableDetailedErrors(true);
         });
     }
 

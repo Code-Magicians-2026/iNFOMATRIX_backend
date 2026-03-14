@@ -3,6 +3,7 @@ using Infomatrix.Core.Api.Extensions;
 using Infomatrix.Core.Api.Features.AI.Requests;
 using Infomatrix.Core.Application.Abstractions.Messaging;
 using Infomatrix.Core.Application.DTOs;
+using Infomatrix.Core.Application.Features.AI.GenerateConclusion;
 using Infomatrix.Core.Application.Features.AI.GenerateQuest;
 using Infomatrix.Core.Application.Features.AI.GenerateQuestWithImage;
 using Infomatrix.Core.Application.Features.AI.GetAiResponse;
@@ -103,6 +104,33 @@ public class AIController : BaseController
 
         var result = await _sender
             .Send(command, cancellationToken);
+
+        return result.ToActionResult();
+    }
+
+    [HttpPost("summary-vision")]
+    public async Task<IActionResult> GenerateSummaryByPhotos(
+        IFormFile image1,
+        IFormFile image2,
+        CancellationToken cancellationToken)
+    {
+        if (image1 == null || image2 == null)
+        {
+            return BadRequest("Both 'Before' and 'After' images are required.");
+        }
+
+        using var stream1 = image1.OpenReadStream();
+        using var stream2 = image2.OpenReadStream();
+
+        var beforeImage = new ImageDto(stream1, image1.ContentType, image1.FileName);
+        var afterImage = new ImageDto(stream2, image2.ContentType, image2.FileName);
+
+        var command = new CheckQuestByImagesCommand(
+            GetUserId(),
+            beforeImage,
+            afterImage);
+
+        var result = await _sender.Send(command, cancellationToken);
 
         return result.ToActionResult();
     }

@@ -61,7 +61,7 @@ internal sealed class RegisterChildCommandHandler
             registerResult.Value.Id,
             command.FirstName,
             command.LastName,
-            command.Email,
+            registerResult.Value.Email,
             command.FamilyId);
 
         await _childRepository
