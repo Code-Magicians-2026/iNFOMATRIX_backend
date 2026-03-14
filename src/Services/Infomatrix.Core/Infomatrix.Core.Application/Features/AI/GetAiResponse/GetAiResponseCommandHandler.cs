@@ -21,6 +21,7 @@ internal sealed class GetAiResponseCommandHandler
     {
         return await _aiService.GetResponseAsync(
             request.UserId,
+            string.Empty,
             request.Prompt,
             null,
             cancellationToken);

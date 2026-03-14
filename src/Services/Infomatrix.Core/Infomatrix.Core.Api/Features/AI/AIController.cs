@@ -3,21 +3,27 @@ using Infomatrix.Core.Api.Extensions;
 using Infomatrix.Core.Api.Features.AI.Requests;
 using Infomatrix.Core.Application.Abstractions.Messaging;
 using Infomatrix.Core.Application.DTOs;
+using Infomatrix.Core.Application.Features.AI.GenerateQuest;
+using Infomatrix.Core.Application.Features.AI.GenerateQuestWithImage;
 using Infomatrix.Core.Application.Features.AI.GetAiResponse;
 using Infomatrix.Core.Application.Features.AI.GetVisionAiResponse;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace Infomatrix.Core.Api.Features.AI;
 
-// TODO: uncomment after testing
-//[Authorize]
+[Authorize]
 [Route("api/ai")]
 [ApiController]
 public class AIController : BaseController
 {
-    public AIController(ISender sender)
+    private readonly IChatCompletionService _chatService;
+
+    public AIController(ISender sender, IChatCompletionService chatService)
         : base(sender)
     {
+        _chatService = chatService;
     }
 
     [HttpPost]
@@ -60,4 +66,58 @@ public class AIController : BaseController
         return result
             .ToActionResult();
     }
+
+    [HttpPost("quest")]
+    public async Task<IActionResult> GenerateQuestAsync(
+        [FromForm] AIRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new GenerateQuestCommand(
+            GetUserId(),
+            request.Prompt);
+
+        var result = await _sender
+            .Send(command, cancellationToken);
+
+        return result.ToActionResult();
+    }
+
+    [HttpPost("quest-vision")]
+    public async Task<IActionResult> GenerateQuestAsync(
+        [FromForm] AIRequest request,
+        IFormFile file,
+        CancellationToken cancellationToken)
+    {
+        using var stream = file
+            .OpenReadStream();
+
+        ImageDto image = new ImageDto(
+            stream,
+            file.ContentType,
+            file.Name);
+
+        var command = new GenerateQuestWithImageCommand(
+            GetUserId(),
+            request.Prompt,
+            image);
+
+        var result = await _sender
+            .Send(command, cancellationToken);
+
+        return result.ToActionResult();
+    }
+
+    public sealed record QuestPlanResponse(
+        string Title,
+        string Summary,
+        string ChildMessage,
+        IReadOnlyCollection<QuestItemResponse> Quests,
+        int TotalEstimatedMinutes);
+
+    public sealed record QuestItemResponse(
+        string Title,
+        string Description,
+        string Difficulty,
+        int RewardXp,
+        int EstimatedMinutes);
 }

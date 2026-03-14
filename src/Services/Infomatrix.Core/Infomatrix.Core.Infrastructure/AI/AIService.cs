@@ -21,16 +21,22 @@ internal class AIService : IAIService
 
     public async Task<Result<string>> GetResponseAsync(
         Guid userId,
+        string systemPrompt,
         string userPrompt,
         Guid? chatId,
         CancellationToken cancellationToken = default)
     {
+        var chat = new ChatHistory();
+
+        chat.AddSystemMessage(systemPrompt);
+        chat.AddUserMessage(userPrompt);
+
         var executionSettings = new AzureOpenAIPromptExecutionSettings()
         {
         };
 
         var response = await _chatCompletion.GetChatMessageContentAsync(
-            userPrompt,
+            chat,
             executionSettings,
             _kernel,
             cancellationToken);
