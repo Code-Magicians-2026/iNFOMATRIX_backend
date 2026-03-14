@@ -1,4 +1,5 @@
 ﻿using Infomatrix.Core.Domain.Common;
+using System.Linq.Expressions;
 
 namespace Infomatrix.Core.Application.Abstractions.Repositories;
 
@@ -21,5 +22,9 @@ public interface IRepository<T>
     void Delete(T entity);
 
     Task SaveChangesAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<bool> AnyAsync(
+        Expression<Func<T, bool>> predicate,
         CancellationToken cancellationToken = default);
 }

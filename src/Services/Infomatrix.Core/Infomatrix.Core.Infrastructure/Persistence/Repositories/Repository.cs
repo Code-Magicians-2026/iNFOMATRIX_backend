@@ -1,6 +1,7 @@
 ﻿using Infomatrix.Core.Application.Abstractions.Repositories;
 using Infomatrix.Core.Domain.Common;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Infomatrix.Core.Infrastructure.Persistence.Repositories;
 
@@ -50,6 +51,13 @@ public class Repository<T> : IRepository<T>
     public void Delete(T entity)
     {
         _dbSet.Remove(entity);
+    }
+
+    public async Task<bool> AnyAsync(
+        Expression<Func<T, bool>> predicate,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.AnyAsync(predicate, cancellationToken);
     }
 
     public async Task SaveChangesAsync(
